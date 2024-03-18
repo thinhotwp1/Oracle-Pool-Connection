@@ -6,7 +6,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 public class OracleConnection implements Serializable {
@@ -67,6 +69,16 @@ public class OracleConnection implements Serializable {
     }
 
     public boolean isOpen() {
-        return oracleDataSource != null;
+        try {
+            Connection connection = getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from dual");
+            resultSet.close();
+            statement.close();
+            closeConnection(connection);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

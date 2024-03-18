@@ -12,22 +12,24 @@ import java.util.Map;
 //@SpringBootApplication
 public class OraclePoolApplication {
     private Connection connection;
+    private static ConnectionFactory connectionFactory;
 
     // TODO: Main for test
     public static void main(String[] args) throws Exception {
         try {
             // Change info of oracle database
-            ConnectionFactory.url = "jdbc:oracle:thin:@10.11.10.12:1521:APP";
-            ConnectionFactory.user = "EOCSGW_OWNER";
-            ConnectionFactory.password = "ocsgw";
-            ConnectionFactory.maxConnection = 10;
-            ConnectionFactory.minConnection = 1;
+            connectionFactory = new ConnectionFactory();
+            connectionFactory.url = "jdbc:oracle:thin:@10.11.10.12:1521:APP";
+            connectionFactory.user = "EOCSGW_OWNER";
+            connectionFactory.password = "ocsgw";
+            connectionFactory.maxConnection = 10;
+            connectionFactory.minConnection = 1;
 
             callFunctionOrProduceOracle();
 
         } finally {
             // Close connection finally
-            ConnectionFactory.closePool();
+            connectionFactory.closePool();
         }
     }
 
@@ -45,7 +47,7 @@ public class OraclePoolApplication {
 
      */
     private static void callFunctionOrProduceOracle() throws Exception {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = connectionFactory.getConnection();
         try {
             CallableStatement callableStatement = connection.prepareCall("{ ? = call any_function(?) }");
             callableStatement.registerOutParameter(1, Types.VARCHAR);
@@ -58,21 +60,21 @@ public class OraclePoolApplication {
             callableStatement.close();
         } finally {
             // Close connection finally
-            ConnectionFactory.closeConnection(connection);
+            connectionFactory.closeConnection(connection);
         }
     }
 
     private Connection getConnection() throws Exception {
         if (connection == null || connection.isClosed()) {
-            connection = ConnectionFactory.getConnection();
+            connection = connectionFactory.getConnection();
         }
         return connection;
     }
     public boolean isOpen() throws Exception {
-        return ConnectionFactory.isOpen();
+        return connectionFactory.isOpen();
     }
     public void closePool() throws SQLException {
-        ConnectionFactory.closePool();
+        connectionFactory.closePool();
     }
 
 }
